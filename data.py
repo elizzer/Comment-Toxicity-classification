@@ -100,3 +100,20 @@ print('[=]CSV written...')
 
 
 # print(header_dict)
+
+
+
+
+#reducing only 10000 datarows
+
+# import pandas as pd
+
+# df=pd.read_csv("toxic_spans.csv")
+# i=0
+# count=0
+# for i in range(len(df['position'])):
+#     if len(df['position'][i])==0:
+#         print("[=]Ntoxic...")
+#         count+=1
+#     i+=1
+# print(count)
