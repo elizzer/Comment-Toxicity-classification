@@ -110,3 +110,15 @@ for epoch in range(num_epochs):
 
 # For CRF, you would need to integrate it into your training and decoding process.
 # Please refer to the torchcrf documentation for CRF-specific details.
+
+#%%
+import re
+
+sentence = "Hello!!!!!! This is a $t3st @of special characters. #GoodLuck!!"
+pattern = r'[!@#$%^&*]+'
+matches = re.finditer(pattern, sentence)
+print(matches)
+for match in matches:
+    print(match)
+
+# %%

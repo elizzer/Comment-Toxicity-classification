@@ -19,7 +19,8 @@ class BERTEmbedding(nn.Module):
         self.pos_inp=torch.tensor([i for i in range(max_len)])
 
     def forward(self,seq,seg):
-        embed_val=self.tok_embed(seq)+self.seg_embed(seg)+self.pos_embed(self.pos_inp)
+        # embed_val=self.tok_embed(seq)+self.seg_embed(seg)+self.pos_embed(self.pos_inp)
+        embed_val=self.tok_embed(seq)
         return embed_val
     
 # %%
