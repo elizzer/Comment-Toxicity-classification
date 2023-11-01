@@ -1,33 +1,12 @@
-# text='hello!you are a stupid and idiot'
-# span=[16,17,18,19,20,21,22,27,28,29,30,31,32]
-# i=0
-# t=list(text)
+import pandas as pd
 
-# for index in span:
-#     if(t[index]==' ' and span[i+1]==index+1):
-#         t.pop(index)
-#         print(span.pop(i))
-#         print(span)
-#         for x in range(i,len(span)):
-#             span[x]=span[x]-1
-#         print(span)
-            
-#     i+=1
-# print( ''.join(t))
-# print(span)
+# Load your dataset into a pandas DataFrame (replace 'your_dataset.csv' with the actual file path)
+df = pd.read_csv('dataset/singleton_removed.csv')
 
-text = 'hello!you are a stupid and idiot'
-span = [16, 17, 18, 19, 20, 21, 22, 27, 28, 29, 30, 31, 32]
-t = list(text)
-new_text = []
-new_span = []
+# Assuming 'label' is the column you're interested in
+# Count of rows where the 'label' column value is 1
+count_label_1 = (df['label'] == 1).sum()
 
-i = 0
-while i < len(span):
-    if span[i] < len(t) and (i == len(span) - 1 or t[span[i]] != ' ' or span[i] != span[i + 1] - 1):
-        new_text.append(t[span[i]])
-        new_span.append(span[i])
-    i += 1
+print("Count of rows where 'label' is 1:", count_label_1)
+print("Count of rows where 'label' is 0:", (df['label']).sum())
 
-print(''.join(new_text))
-print(new_span)

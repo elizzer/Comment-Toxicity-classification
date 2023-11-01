@@ -1,71 +1,143 @@
-#remove urls and combine repeated special characters
+
 import re
 import pandas as pd
 
-input_csv_file = 'dataset.csv'  
-# df = pd.read_csv(input_csv_file)
 
-def remove_urls(text):
-    return re.sub(r'http\S+', '', text)
+#removing urls 
 
-def combine_repeated_chars(text):
-    return re.sub(r'([!@#$%^&*()_+=\-{}[\]:;"\'|<>,./?\\])\1+', r'\1', text)
+df = pd.read_csv('dataset.csv')
 
-# df['comment_text'] = df['comment_text'].apply(lambda x: combine_repeated_chars(remove_urls(x)))
+def remove_url(text,span):
+    matches = [match for match in re.finditer(r'\bhttps?://\S+\b', text)]
 
-def filter_singleton(text,span):
-    span=span[1:-1]
-    span=span.split(",")
-    for i in span:
-        if " " in i:
-            print("[+]This span has space:",i,":",i.strip(" "),":")
-    # span=[integer(s) for s in span]
-    # print(span)
-    # for i in span:
-        # print(type(int(i.strip())))
-        # if(text[i]==' '):
-        #     print('[+] singleton example'+text)
-    # print(text,span)
+    offset=0
+    if(matches):
+        for match in matches:
+            start_index=match.start()-offset
+            end_index=match.end()-offset
+            length=end_index-start_index
+            offset+=length
+            new_span=[]
+            for s in span:
+                if s > start_index:
+                    new_span.append(s-length)
+                else:
+                    new_span.append(s)
+            span=new_span
+        text=re.sub(r'http\S+', '', text)
+        return text,span
+    return text,span
+for i in range(len(df["span"])):
+    df["comment_text"][i],df["span"][i]=remove_url(df["comment_text"][i],eval(df["span"][i]))
 
-#remove leading whitespace 
-def r_whitespace(text,span):
-    i=0
-    t=list(text)
-
-    for index in span:
-        if(t[index]==' '):
-            list.pop(index) 
-            span.pop(i)
-            for x in range(i,len(span)):
-                span[x]=span[x]-1
-    i+=1
+df.to_csv("dataset1.csv",mode='w',index=False)
 
 
-def run():
-    df = pd.read_csv(input_csv_file)
-    # for i in range(d["comment_text"]):
-    for i in range(100):
-        # filter_singleton(df["comment_text"][i],df["span"][i])
-        r_whitespace(df["comment_text"][i],df["span"][i])
+#remove repeated special characters
 
-# run()
-# Python3 code to remove whitespace
-def remove(string):
-	return "".join(string.split())
+DATASET_LEN=0
+
+df = pd.read_csv('dataset1.csv')
+DATASET_LEN=len(df["span"])
+def remove_repeated_characters(text,span):
+    pattern = r'[!@#$%^&*]+'
+    matches = [match for match in re.finditer(pattern, text) if match.end() - match.start() != 1]
+    offset=0
+    if (matches != []):
+        try:
+            print(matches)
+        except Exception as e:
+            print("Error with",e)
+        
+    if matches:
+        for match in matches:
+            start_index=match.start()-offset
+            end_index=match.end()-offset
+            length=end_index-start_index
+            offset+=length
+            new_span=[]
+            for s in span:
+                try:
+                    if s > start_index:
+                        new_span.append(s-length+1)
+                    else:
+                        new_span.append(s)
+                except Exception as e:
+                    print(text)
+            span=new_span
+        text=re.sub(r'([!@#$%^&*()_+=\-{}[\]:;"\'|<>,./?\\])\1+', r'\1', text)
+    return text,span
+
+def remove_empty_comments(d):
+    result=[]
+    for i in range(DATASET_LEN):
+        if d["comment_text"][i]!="":
+            result.append(d["comment_text"][i])
+    return pd.DataFrame(result)
+    
+print("[+]Removing empty spaces...")
+remove_empty_comments(df)
+print("[+]Removed empty space...")
+for i in range(DATASET_LEN):
+    print(f'[+]Index {i}/{DATASET_LEN}')
+    try:
+        df["comment_text"][i],df["span"][i]=remove_repeated_characters(df["comment_text"][i],eval(df["span"][i]))
+    except Exception as e:
+        print("[+] Error in index ",i)
+
+df.to_csv("dataset/dataset_removed_repeated_characters.csv",mode='w',index=False)
+
+#remove span indicating empty space
+
+df=pd.read_csv('dataset/dataset_removed_long_charcter.csv')
+DATASET_LEN=len(df["span"])
+
+def remove_empty_span(text,spans):
+    for x in spans:
+        if text[x] == ' ':
+            spans.remove(x)
+
+    return (text,spans)
+
+for i in range(DATASET_LEN):
+    try:
+        df["comment_text"][i],df["span"][i]=remove_empty_span(df["comment_text"][i],eval(df["span"][i]))
+    except Exception as e:
+        print("[+] Error in index ",i)
+
+df.to_csv("dataset/space_removed.csv",mode='w',index=False)
+
+#remove singleton
 
 
-# Driver Program
-string = '   Hello   '
-print(string)
-print(":",string.strip(),":")
+Define the function a()
+def a(text, span):
+    for s in span:
+        if s < len(text) and text[s] != " " :
+            w=[" ",",","!","?",".","'","\"",";",":","\/"]
+            while s < len(text) and text[s] not in w:
+                if s in span:
+                    pass
+                else:
+                    print(span)
+                    print(text[s-1])
+                    return False
+                s += 1
+        else:
+            return False
+    return True
 
 
-# df[['comment_text', 'span']] = df.apply(lambda row: r_whitespace(row['comment_text'], row['span']), axis=1)
+df = pd.read_csv('dataset/space_removed.csv')  
 
 
-
-# output_csv_file = 'processed_dataset.csv'  
-# df.to_csv(output_csv_file, index=False)
-# print(df.head(10))
+df['result'] = df.apply(lambda row: a(row['comment_text'], eval(row['span'])), axis=1)
 
 
+filtered_df = df[df['result']]
+
+filtered_df.to_csv('dataset/singleton_removed.csv',mode='w',index=False)
+
+
+#Count of rows where 'label' is 1: 9816
+#Count of rows where 'label' is 0: 9971
